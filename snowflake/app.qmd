@@ -55,8 +55,8 @@ ui.input_select("region", "Region", choices=["All"], selected="All")
 raw_data = reactive.Value(None)
 
 @reactive.effect
-@reactive.event(input.load_data)
 def load_all():
+    input.load_data()
     session_token = session.http_conn.headers.get("Posit-Connect-User-Session-Token")
     if not session_token:
         ui.notification_show("No session token found. Deploy on Posit Connect.", type="error")
