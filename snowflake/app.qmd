@@ -1,8 +1,7 @@
 ---
 title: "Snowflake Dashboard (find by type)"
 format: dashboard
-server:
-  type: shiny
+server: shiny
 ---
 
 ```{python}
@@ -35,24 +34,6 @@ def fetch_snowflake(access_token: str) -> pd.DataFrame:
     df["SALE_DATE"] = pd.to_datetime(df["SALE_DATE"])
     df["MONTH"] = df["SALE_DATE"].dt.to_period("M").astype(str)
     return df
-```
-
-# {.sidebar}
-
-OAuth via `find_by(integration_type=SNOWFLAKE)`
-
-```{python}
-ui.input_action_button("load_data", "Refresh Data", class_="btn-primary w-100")
-ui.tags.script(
-    "setTimeout(function() { document.getElementById('load_data').click(); }, 500);"
-)
-ui.tags.hr()
-ui.input_select("category", "Category", choices=["All"], selected="All")
-ui.input_select("region", "Region", choices=["All"], selected="All")
-```
-
-```{python}
-#| context: server
 
 raw_data = reactive.Value(None)
 
@@ -117,6 +98,20 @@ def avg_order():
     if df is None or len(df) == 0:
         return "--"
     return f"${df['TOTAL_AMOUNT'].mean():,.2f}"
+```
+
+# {.sidebar}
+
+OAuth via `find_by(integration_type=SNOWFLAKE)`
+
+```{python}
+ui.input_action_button("load_data", "Refresh Data", class_="btn-primary w-100")
+ui.tags.script(
+    "setTimeout(function() { document.getElementById('load_data').click(); }, 500);"
+)
+ui.tags.hr()
+ui.input_select("category", "Category", choices=["All"], selected="All")
+ui.input_select("region", "Region", choices=["All"], selected="All")
 ```
 
 # Snowflake Sales
