@@ -34,12 +34,28 @@ def fetch_snowflake(access_token: str) -> pd.DataFrame:
     df["SALE_DATE"] = pd.to_datetime(df["SALE_DATE"])
     df["MONTH"] = df["SALE_DATE"].dt.to_period("M").astype(str)
     return df
+```
 
+# {.sidebar}
+
+OAuth via `find_by(integration_type=SNOWFLAKE)`
+
+```{python}
+ui.input_action_button("load_data", "Refresh Data", class_="btn-primary w-100")
+ui.tags.script(
+    "setTimeout(function() { document.getElementById('load_data').click(); }, 500);"
+)
+ui.tags.hr()
+ui.input_select("category", "Category", choices=["All"], selected="All")
+ui.input_select("region", "Region", choices=["All"], selected="All")
+```
+
+```{python}
 raw_data = reactive.Value(None)
 
 @reactive.effect
+@reactive.event(input.load_data)
 def load_all():
-    input.load_data()
     session_token = session.http_conn.headers.get("Posit-Connect-User-Session-Token")
     if not session_token:
         ui.notification_show("No session token found. Deploy on Posit Connect.", type="error")
@@ -81,37 +97,6 @@ def filtered():
     if input.region() != "All":
         df = df[df["REGION"] == input.region()]
     return df
-
-@render.text
-def total_sales():
-    df = filtered()
-    return f"${df['TOTAL_AMOUNT'].sum():,.2f}" if df is not None else "--"
-
-@render.text
-def total_orders():
-    df = filtered()
-    return f"{len(df):,}" if df is not None else "--"
-
-@render.text
-def avg_order():
-    df = filtered()
-    if df is None or len(df) == 0:
-        return "--"
-    return f"${df['TOTAL_AMOUNT'].mean():,.2f}"
-```
-
-# {.sidebar}
-
-OAuth via `find_by(integration_type=SNOWFLAKE)`
-
-```{python}
-ui.input_action_button("load_data", "Refresh Data", class_="btn-primary w-100")
-ui.tags.script(
-    "setTimeout(function() { document.getElementById('load_data').click(); }, 500);"
-)
-ui.tags.hr()
-ui.input_select("category", "Category", choices=["All"], selected="All")
-ui.input_select("region", "Region", choices=["All"], selected="All")
 ```
 
 # Snowflake Sales
@@ -120,19 +105,30 @@ ui.input_select("region", "Region", choices=["All"], selected="All")
 
 ::: {.valuebox title="Total Sales" icon="currency-dollar" color="primary"}
 ```{python}
-ui.output_text("total_sales")
+@render.text
+def total_sales():
+    df = filtered()
+    return f"${df['TOTAL_AMOUNT'].sum():,.2f}" if df is not None else "--"
 ```
 :::
 
 ::: {.valuebox title="Orders" icon="cart" color="info"}
 ```{python}
-ui.output_text("total_orders")
+@render.text
+def total_orders():
+    df = filtered()
+    return f"{len(df):,}" if df is not None else "--"
 ```
 :::
 
 ::: {.valuebox title="Avg Order" icon="calculator" color="success"}
 ```{python}
-ui.output_text("avg_order")
+@render.text
+def avg_order():
+    df = filtered()
+    if df is None or len(df) == 0:
+        return "--"
+    return f"${df['TOTAL_AMOUNT'].mean():,.2f}"
 ```
 :::
 
