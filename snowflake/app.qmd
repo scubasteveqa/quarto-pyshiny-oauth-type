@@ -1,7 +1,8 @@
 ---
 title: "Snowflake Dashboard (find by type)"
 format: dashboard
-server: shiny
+server:
+  type: shiny
 ---
 
 ```{python}
